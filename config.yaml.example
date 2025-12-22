@@ -1,0 +1,26 @@
+# Nyao設定ファイルサンプル
+# このファイルをconfig.yamlとしてコピーして使用してください
+
+# Slack設定
+slack:
+  channel_ids:  # 監視対象チャンネルIDのリスト
+    - "C123456"
+    - "C789012"
+
+# LLM設定（LiteLLMの設定を直接パススルー）
+litellm:
+  model: "openai/gpt-4o"  # プロバイダー/モデル形式
+  api_key: "$OPENAI_API_KEY"  # プレフィックスに $ がついた場合は環境変数を設定する
+  temperature: 0.7
+  max_tokens: 1000
+
+# Bot動作設定
+bot:
+  response_delay:  # 応答判定までの待機時間設定
+    base: 60  # 基本待機時間（秒、デフォルト: 60）
+    jitter: 10  # ランダムな揺らぎ（秒、デフォルト: 10）
+  persona: "友達のようなカジュアルな口調で話す"  # ボットのペルソナ設定
+
+# ログ設定
+logging:
+  level: "INFO"  # ログレベル（DEBUG, INFO, WARNING, ERROR, CRITICAL）
