@@ -1,0 +1,268 @@
+# レイヤー2a: Slack連携レイヤー（Slack Integration Layer）
+
+## 概要
+
+Slack APIとの連携を担当し、メッセージの受信・送信、イベント処理を行います。
+
+## 実装優先度
+
+**高** - 基盤レイヤーの後に実装。LLM連携と並行実装可能。
+
+## 依存関係
+
+- **依存先**: レイヤー1（基盤レイヤー）
+  - 設定管理システム
+  - ロギングシステム
+  - データモデル
+  - エラーハンドリング
+- **依存元**: レイヤー3（ビジネスロジックレイヤー）
+- **並行実装可能**: LLM連携レイヤー（レイヤー2b）と独立
+
+## コンポーネント
+
+### 1. Slack接続管理 (Slack Connection Manager)
+
+#### 目的
+
+Slack APIへの接続を確立し、Socket Modeまたはイベント APIを使用してリアルタイムイベントを受信する。
+
+#### 機能要件
+
+- **FR-001**: 指定されたチャンネルのメッセージを監視する
+- **FR-005**: 複数の指定チャンネルで同時に動作する
+
+#### 実装方針
+
+**Phase 1ではSocket Modeを使用**します。これにより以下の利点があります：
+- 外部からのHTTPSエンドポイントが不要（開発が容易）
+- WebSocketベースでリアルタイム通信
+- 自宅Kubernetesクラスタでの運用に適している
+
+#### 主要インターフェース
+
+**SlackConnectionManagerクラス**:
+- `__init__(bot_token, app_token)`: 初期化
+- `start()`: Slack接続を開始
+- `stop()`: Slack接続を停止
+- `register_message_handler(handler)`: メッセージハンドラを登録
+- `register_reaction_handler(handler)`: リアクションハンドラを登録
+
+#### Slack APIの権限設定
+
+Slack Appに必要な権限（OAuth Scopes）:
+```
+Bot Token Scopes:
+- channels:history    # チャンネルメッセージの読み取り
+- channels:read       # チャンネル情報の読み取り
+- chat:write          # メッセージの送信
+- reactions:read      # リアクションの読み取り
+- users:read          # ユーザー情報の読み取り
+
+Event Subscriptions:
+- message.channels    # チャンネルメッセージイベント
+- reaction_added      # リアクション追加イベント
+```
+
+#### テスト要件
+
+- Slack APIへの接続が正常に確立できること
+- 接続エラー時に適切な例外がスローされること
+- 接続の開始・停止が正常に動作すること
+
+---
+
+### 2. イベント受信 (Event Receiver)
+
+#### 目的
+
+Slackからのイベント（メッセージ投稿、リアクション追加等）を受信し、内部データモデルに変換する。
+
+#### 機能要件
+
+- **FR-001**: 指定されたチャンネルのメッセージを監視する
+- **FR-006**: スレッド内のコンテキストを理解して応答する
+
+#### 主要インターフェース
+
+**EventReceiverクラス**:
+- `__init__(client, monitored_channels)`: 初期化
+- `handle_message_event(event, say)`: メッセージイベントを処理し、SlackMessageに変換
+- `handle_reaction_event(event)`: リアクションイベントを処理
+
+#### メッセージフィルタリング
+
+以下のメッセージは処理対象外とします：
+- Bot自身が投稿したメッセージ
+- 監視対象外のチャンネルのメッセージ
+- システムメッセージ（チャンネル参加通知等）
+
+#### テスト要件
+
+- メッセージイベントが正しくSlackMessageモデルに変換されること
+- Bot自身のメッセージが無視されること
+- 監視対象外チャンネルのメッセージが無視されること
+- スレッドメッセージが正しく識別されること
+- リアクションイベントが正しく処理されること
+
+---
+
+### 3. メッセージ送信 (Message Sender)
+
+#### 目的
+
+Slackチャンネルにメッセージを送信する。
+
+#### 機能要件
+
+- **FR-004**: 人間らしい自然な応答を生成して投稿する
+- スレッド内での返信
+- エラーハンドリングとリトライ
+
+#### 主要インターフェース
+
+**MessageSenderクラス**:
+- `__init__(client)`: 初期化
+- `send_message(channel_id, text, thread_ts)`: メッセージを送信（リトライ機能付き）
+- `send_typing_indicator(channel_id)`: 入力中インジケーターを表示（将来的な実装用）
+
+#### メッセージ送信のレート制限対応
+
+**NFR-006**: Slack APIの一時的な障害時に自動リトライ
+
+Slack APIのレート制限:
+- Tier 3: 50+ requests per minute
+- Tier 4: 100+ requests per minute
+
+対応策:
+- `@with_retry`デコレータでリトライ実装
+- レート制限エラー（429）時は指定された待機時間後にリトライ
+- 最大3回までリトライ
+
+#### テスト要件
+
+- メッセージが正常に送信されること
+- スレッド返信が正しく動作すること
+- リトライ機能が動作すること
+- レート制限エラーが適切に処理されること
+
+---
+
+### 4. スレッド履歴取得 (Thread History Fetcher)
+
+#### 目的
+
+スレッド内の過去のメッセージを取得し、コンテキスト理解のための情報を提供する。
+
+#### 機能要件
+
+- **FR-006**: スレッド内のコンテキストを理解して応答する
+
+#### 主要インターフェース
+
+**ThreadHistoryFetcherクラス**:
+- `__init__(client)`: 初期化
+- `fetch_thread_messages(channel_id, thread_ts, limit)`: スレッド内のメッセージを取得し、SlackMessageリストとして返す
+
+#### テスト要件
+
+- スレッド履歴が正しく取得されること
+- メッセージが時系列順に並んでいること
+- Bot自身のメッセージが除外されること
+- エラー時に適切な例外がスローされること
+
+---
+
+## ディレクトリ構成
+
+```
+nyao/
+└── integrations/
+    └── slack/
+        ├── __init__.py
+        ├── connection.py       # SlackConnectionManager
+        ├── event_receiver.py   # EventReceiver
+        ├── message_sender.py   # MessageSender
+        └── thread_fetcher.py   # ThreadHistoryFetcher
+```
+
+## 実装タスク
+
+### タスク1: Slack接続管理
+
+- [ ] `integrations/slack/connection.py`の実装
+- [ ] Socket Mode接続の確立
+- [ ] イベントハンドラの登録機能
+- [ ] 接続の開始・停止
+- [ ] テストコードの作成
+
+### タスク2: イベント受信
+
+- [ ] `integrations/slack/event_receiver.py`の実装
+- [ ] メッセージイベントの処理
+- [ ] リアクションイベントの処理
+- [ ] チャンネルフィルタリング
+- [ ] ユーザー情報取得（キャッシュ機能含む）
+- [ ] テストコードの作成
+
+### タスク3: メッセージ送信
+
+- [ ] `integrations/slack/message_sender.py`の実装
+- [ ] メッセージ送信機能
+- [ ] スレッド返信機能
+- [ ] リトライ機能
+- [ ] レート制限対応
+- [ ] テストコードの作成
+
+### タスク4: スレッド履歴取得
+
+- [ ] `integrations/slack/thread_fetcher.py`の実装
+- [ ] スレッドメッセージ取得機能
+- [ ] ユーザー情報取得（キャッシュ機能含む）
+- [ ] テストコードの作成
+
+## テスト戦略
+
+### ユニットテスト
+
+**イベント受信** (`tests/integrations/slack/test_event_receiver.py`):
+- 監視対象チャンネルのメッセージが正しく処理されること
+- Bot自身のメッセージが無視されること
+- スレッドメッセージが正しく識別されること
+
+**メッセージ送信** (`tests/integrations/slack/test_message_sender.py`):
+- メッセージが正常に送信されること
+- エラー時にリトライが動作すること
+- レート制限エラーが適切に処理されること
+
+**スレッド履歴取得** (`tests/integrations/slack/test_thread_fetcher.py`):
+- スレッドメッセージが正しく取得されること
+
+### モックの使用
+
+Slack APIへの実際の通信は行わず、AsyncMockを使用してテストします。
+
+## 依存パッケージ
+
+```toml
+[tool.uv.dependencies]
+slack-bolt = "^1.18"
+slack-sdk = "^3.27"
+```
+
+## 完了条件
+
+- [ ] Slack APIへの接続が確立できること
+- [ ] メッセージイベントが受信・処理できること
+- [ ] メッセージが送信できること
+- [ ] スレッド返信が動作すること
+- [ ] スレッド履歴が取得できること
+- [ ] リトライ機能が動作すること
+- [ ] すべてのユニットテストがパスすること
+- [ ] ruffによるコード品質チェックがパスすること
+- [ ] tyによる型チェックがパスすること
+
+## 参考資料
+
+- [Slack Bolt for Python](https://slack.dev/bolt-python/concepts)
+- [Slack API Documentation](https://api.slack.com/)
+- [Socket Mode](https://api.slack.com/apis/connections/socket)
