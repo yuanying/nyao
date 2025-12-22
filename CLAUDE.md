@@ -34,7 +34,7 @@ uv run pytest
 
 ### 主要ライブラリ
 - **Slack連携**: slack-sdk または slack-bolt
-- **LLM連携**: litellm（複数のLLMプロバイダー対応）
+- **LLM連携**: strands-agents + litellm（複数のLLMプロバイダー対応）
 - **非同期処理**: asyncio + aiohttp
 - **データベース**:
   - Phase 1: SQLite（MVP）
