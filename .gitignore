@@ -19,6 +19,7 @@ config.yaml
 .pytest_cache/
 .coverage
 htmlcov/
+coverage.xml
 
 # IDE
 .vscode/
