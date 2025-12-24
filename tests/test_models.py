@@ -1,7 +1,7 @@
 """データモデルのテストコード"""
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
@@ -203,13 +203,13 @@ class TestConversationContext:
             user_id="U789012",
             user_name="test_user",
             text="First message",
-            timestamp=datetime(2024, 12, 21, 10, 30, 45),
+            timestamp=datetime(2024, 12, 21, 10, 30, 45, tzinfo=UTC),
         )
 
         context = ConversationContext(
             channel_id="C123456",
             messages=[msg1],
-            last_updated=datetime(2024, 12, 21, 10, 30, 45),
+            last_updated=datetime(2024, 12, 21, 10, 30, 45, tzinfo=UTC),
         )
 
         original_last_updated = context.last_updated
@@ -232,7 +232,7 @@ class TestConversationContext:
         """get_recent_messages()で直近のメッセージを取得できること"""
         messages = [
             SlackMessage(
-                message_id=f"123456789{i}.123456",
+                message_id=f"123456789{i:02d}.123456",
                 channel_id="C123456",
                 user_id="U789012",
                 user_name="test_user",
