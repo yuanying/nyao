@@ -41,6 +41,7 @@ class SlackAPIError(NyaoException):
     # リトライ可能なエラーコード
     RETRYABLE_ERROR_CODES = {
         "rate_limited",
+        "ratelimited",  # Slack APIの実際のエラーコード
         "service_unavailable",
         "internal_error",
     }
