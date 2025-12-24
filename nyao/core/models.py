@@ -4,7 +4,7 @@ Phase 1で使用する主要なデータモデルを定義します。
 すべてのモデルはPydantic BaseModelを継承し、型安全性とバリデーションを提供します。
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
@@ -59,7 +59,7 @@ class ConversationContext(BaseModel):
             message: 追加するSlackMessageオブジェクト
         """
         self.messages.append(message)
-        self.last_updated = datetime.now()
+        self.last_updated = datetime.now(UTC)
 
     def get_recent_messages(self, limit: int) -> list[SlackMessage]:
         """直近のlimit件のメッセージを取得
