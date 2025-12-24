@@ -134,7 +134,7 @@ class TestSlackMessage:
                 user_id="U789012",
                 user_name="test_user",
                 text="Hello, world!",
-                timestamp="invalid_datetime",  # 不正な型
+                timestamp="invalid_datetime",  # type: ignore  # 不正な型
             )
 
 
@@ -470,6 +470,6 @@ class TestLLMResponse:
             LLMResponse(
                 content="This is a generated response.",
                 model="openai/gpt-4o",
-                usage="invalid_usage",  # 不正な型（辞書でない）
+                usage="invalid_usage",  # type: ignore  # 不正な型（辞書でない）
                 finish_reason="stop",
             )
