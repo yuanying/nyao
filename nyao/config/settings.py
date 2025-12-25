@@ -55,6 +55,14 @@ class LoggingSettings(BaseModel):
     )
 
 
+class LiteLLMSettings(BaseModel):
+    """LiteLLM設定（strands-agents LiteLLMModel形式）"""
+
+    model_id: str = Field(description="LiteLLMモデルID（プロバイダー/モデル形式）")
+    client_args: dict[str, Any] = Field(default_factory=dict, description="LiteLLMクライアント引数")
+    params: dict[str, Any] = Field(default_factory=dict, description="LiteLLMモデルパラメータ")
+
+
 class Settings(BaseSettings):
     """アプリケーション設定
 
@@ -75,7 +83,7 @@ class Settings(BaseSettings):
 
     # YAMLファイルから読み込む設定
     slack: SlackSettings
-    litellm: dict[str, Any]
+    litellm: LiteLLMSettings
     bot: BotSettings = Field(default_factory=BotSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
 

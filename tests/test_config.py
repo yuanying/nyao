@@ -6,6 +6,7 @@ from pydantic import ValidationError
 
 from nyao.config.settings import (
     BotSettings,
+    LiteLLMSettings,
     LoggingSettings,
     SlackSettings,
     get_response_delay_with_jitter,
@@ -27,7 +28,7 @@ class TestSettings:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -49,7 +50,10 @@ class TestSettings:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456", "C789012"]},
-            "litellm": {"model": "openai/gpt-4o", "temperature": 0.8, "max_tokens": 2000},
+            "litellm": {
+                "model_id": "openai/gpt-4o",
+                "params": {"temperature": 0.8, "max_tokens": 2000},
+            },
             "bot": {"response_delay": {"base": 90, "jitter": 20}, "persona": "テストペルソナ"},
             "logging": {"level": "DEBUG"},
         }
@@ -62,9 +66,9 @@ class TestSettings:
         settings = get_settings()
 
         assert settings.slack.channel_ids == ["C123456", "C789012"]
-        assert settings.litellm["model"] == "openai/gpt-4o"
-        assert settings.litellm["temperature"] == 0.8
-        assert settings.litellm["max_tokens"] == 2000
+        assert settings.litellm.model_id == "openai/gpt-4o"
+        assert settings.litellm.params["temperature"] == 0.8
+        assert settings.litellm.params["max_tokens"] == 2000
         assert settings.bot.response_delay.base == 90
         assert settings.bot.response_delay.jitter == 20
         assert settings.bot.persona == "テストペルソナ"
@@ -79,7 +83,10 @@ class TestSettings:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o", "api_key": "$OPENAI_API_KEY"},
+            "litellm": {
+                "model_id": "openai/gpt-4o",
+                "client_args": {"api_key": "$OPENAI_API_KEY"},
+            },
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -89,7 +96,7 @@ class TestSettings:
         reload_settings()
         settings = get_settings()
 
-        assert settings.litellm["api_key"] == "sk-test-key"
+        assert settings.litellm.client_args["api_key"] == "sk-test-key"
 
     def test_default_values_applied(self, tmp_path, monkeypatch):
         """デフォルト値が正しく適用されること"""
@@ -100,7 +107,7 @@ class TestSettings:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -124,7 +131,7 @@ class TestSettings:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -142,7 +149,7 @@ class TestSettings:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
             "bot": {"response_delay": {"base": 60, "jitter": 10}},
         }
         with open(config_file, "w") as f:
@@ -207,3 +214,32 @@ class TestLoggingSettings:
         """不正なログレベルが拒否されること"""
         with pytest.raises(ValidationError):
             LoggingSettings(level="INVALID")  # type: ignore[arg-type]
+
+
+class TestLiteLLMSettings:
+    """LiteLLM設定のテスト"""
+
+    def test_model_id_required(self):
+        """model_idが必須であること"""
+        with pytest.raises(ValidationError):
+            LiteLLMSettings()  # type: ignore[call-arg]
+
+    def test_minimal_config(self):
+        """最小限の設定（model_idのみ）で動作すること"""
+        settings = LiteLLMSettings(model_id="openai/gpt-4o")
+        assert settings.model_id == "openai/gpt-4o"
+        assert settings.client_args == {}
+        assert settings.params == {}
+
+    def test_full_config(self):
+        """すべてのフィールドが設定できること"""
+        settings = LiteLLMSettings(
+            model_id="openai/gpt-4o",
+            client_args={"api_key": "sk-test", "api_base": "https://api.example.com"},
+            params={"temperature": 0.7, "max_tokens": 1000},
+        )
+        assert settings.model_id == "openai/gpt-4o"
+        assert settings.client_args["api_key"] == "sk-test"
+        assert settings.client_args["api_base"] == "https://api.example.com"
+        assert settings.params["temperature"] == 0.7
+        assert settings.params["max_tokens"] == 1000
