@@ -18,16 +18,18 @@ class TestNyaoAgentInit:
             agent = NyaoAgent(model_id="openai/gpt-4o")
             assert agent.model_id == "openai/gpt-4o"
 
-    def test_init_with_api_key(self):
-        """APIキーを指定して初期化できること"""
+    def test_init_with_client_args(self):
+        """client_argsを指定して初期化できること"""
         with patch("nyao.integrations.llm.agent_base.LiteLLMModel") as mock_model:
-            agent = NyaoAgent(model_id="openai/gpt-4o", api_key="test-api-key")
+            client_args = {"api_key": "test-api-key", "api_base": "https://api.example.com"}
+            agent = NyaoAgent(model_id="openai/gpt-4o", client_args=client_args)
             assert agent.model_id == "openai/gpt-4o"
-            # LiteLLMModelにapi_keyが渡されていることを確認
+            assert agent.client_args == client_args
+            # LiteLLMModelにclient_argsがそのまま渡されていることを確認
             mock_model.assert_called()
             call_kwargs = mock_model.call_args[1]
             assert "client_args" in call_kwargs
-            assert call_kwargs["client_args"]["api_key"] == "test-api-key"
+            assert call_kwargs["client_args"] == client_args
 
     def test_init_with_custom_params(self):
         """カスタムパラメータで初期化できること"""

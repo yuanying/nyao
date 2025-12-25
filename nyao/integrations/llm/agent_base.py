@@ -29,30 +29,21 @@ class NyaoAgent(Agent):
     def __init__(
         self,
         model_id: str,
-        api_key: str | None = None,
-        api_base: str | None = None,
+        client_args: dict[str, Any] | None = None,
         default_params: dict[str, Any] | None = None,
     ) -> None:
         """初期化
 
         Args:
             model_id: LiteLLM形式のモデルID (例: "openai/gpt-4o", "anthropic/claude-3-5-sonnet")
-            api_key: APIキー（Noneの場合は環境変数から取得）
-            api_base: カスタムAPIエンドポイント（オプション）
-            default_params: デフォルトのモデルパラメータ
+            client_args: LiteLLMクライアント引数（api_key, api_base等）
+            default_params: デフォルトのモデルパラメータ（temperature, max_tokens等）
         """
         self.model_id = model_id
-        self.api_key = api_key
-        self.api_base = api_base
+        self.client_args = client_args or {}
         self.default_params = default_params or {}
 
         # LiteLLMModelを初期化
-        client_args: dict[str, Any] = {}
-        if api_key:
-            client_args["api_key"] = api_key
-        if api_base:
-            client_args["api_base"] = api_base
-
         model = LiteLLMModel(
             model_id=model_id,
             client_args=client_args if client_args else None,
@@ -147,8 +138,15 @@ class NyaoAgent(Agent):
         Returns:
             エージェントのレスポンス
         """
-        # strands Agentの__call__を使用
-        return self(prompt)
+        # default_paramsをベースに、呼び出し時のパラメータで上書き
+        model_params = {
+            **self.default_params,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+
+        # strands Agentの__call__を使用し、生成パラメータを渡す
+        return self(prompt, model_params=model_params)
 
     def _convert_response(self, response: Any) -> LLMResponse:
         """エージェントのレスポンスをLLMResponseに変換
@@ -206,14 +204,8 @@ class NyaoAgent(Agent):
         """
         litellm_settings = settings.litellm
 
-        model_id = litellm_settings.model_id
-        api_key = litellm_settings.client_args.get("api_key")
-        api_base = litellm_settings.client_args.get("api_base")
-        params = litellm_settings.params
-
         return cls(
-            model_id=model_id,
-            api_key=api_key,
-            api_base=api_base,
-            default_params=params,
+            model_id=litellm_settings.model_id,
+            client_args=litellm_settings.client_args or None,
+            default_params=litellm_settings.params or None,
         )

@@ -248,8 +248,9 @@ class TestBuildResponseGenerationPrompt:
         )
 
         full_prompt = " ".join(msg["content"] for msg in result)
-        # コンテキスト内のメッセージが含まれること
-        assert "今日も仕事頑張ろう" in full_prompt or "anotheruser" in full_prompt
+        # コンテキスト内のメッセージ（内容とユーザー名）が含まれること
+        assert "今日も仕事頑張ろう" in full_prompt
+        assert "anotheruser" in full_prompt
 
     def test_build_response_generation_prompt_without_context(self, manager, sample_message):
         """コンテキストなしでも動作すること"""

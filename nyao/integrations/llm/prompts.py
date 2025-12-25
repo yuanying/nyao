@@ -42,7 +42,7 @@ SHOULD_RESPOND_PROMPT_TEMPLATE = """あなたはSlackボット「Nyao」の応�
 ## 出力形式
 以下のJSON形式で回答してください:
 {{
-    "should_respond": true/false,
+    "should_respond": true,
     "reason": "判定理由（50文字以内）",
     "confidence": 0.0-1.0の確信度,
     "suggested_delay_minutes": null
