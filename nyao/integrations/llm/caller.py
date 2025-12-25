@@ -23,6 +23,15 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
+class _RetryableLLMAPIError(LLMAPIError):
+    """リトライ可能なLLMAPIErrorをラップするクラス
+
+    generate_response内でリトライ対象を区別するために使用される内部クラス。
+    """
+
+    pass
+
+
 class LLMCaller:
     """LLM呼び出しの高レベルAPI
 
@@ -136,11 +145,6 @@ class LLMCaller:
             LLMAPIError: 応答生成に失敗した場合
         """
 
-        class RetryableLLMAPIError(LLMAPIError):
-            """リトライ可能なLLMAPIErrorをラップするクラス"""
-
-            pass
-
         async def _generate() -> LLMResponse:
             try:
                 # プロンプトを構築
@@ -158,7 +162,7 @@ class LLMCaller:
             except LLMAPIError as e:
                 # リトライ可能なエラーの場合のみラップして再送出
                 if e.is_retryable():
-                    raise RetryableLLMAPIError(
+                    raise _RetryableLLMAPIError(
                         message=str(e),
                         model=e.model,
                         status_code=e.status_code,
@@ -174,10 +178,10 @@ class LLMCaller:
                     max_retries=self.MAX_RETRIES,
                     delay=self.RETRY_DELAY,
                     backoff=self.RETRY_BACKOFF,
-                    exceptions=(RetryableLLMAPIError,),
+                    exceptions=(_RetryableLLMAPIError,),
                 ),
             )
-        except RetryableLLMAPIError as e:
+        except _RetryableLLMAPIError as e:
             # リトライ回数を使い果たした場合、元のLLMAPIErrorとして再送出
             raise LLMAPIError(
                 message=str(e),
@@ -208,14 +212,18 @@ class LLMCaller:
             json_str = content
 
         try:
-            return json.loads(json_str.strip())
+            stripped_json = json_str.strip()
+            return json.loads(stripped_json)
         except json.JSONDecodeError as e:
             logger.warning(
                 "json_parse_failed",
                 content=content[:200],
                 error=str(e),
             )
-            raise ValueError(f"Failed to parse JSON response: {e}") from e
+            preview = stripped_json[:200]
+            raise ValueError(
+                f"Failed to parse JSON response: {e}. Content preview: {preview!r}"
+            ) from e
 
     @classmethod
     def from_settings(cls, settings: Settings) -> LLMCaller:

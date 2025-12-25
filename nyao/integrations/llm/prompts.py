@@ -45,7 +45,7 @@ SHOULD_RESPOND_PROMPT_TEMPLATE = """あなたはSlackボット「Nyao」の応�
     "should_respond": true,
     "reason": "判定理由（50文字以内）",
     "confidence": 0.0-1.0の確信度,
-    "suggested_delay_minutes": null
+    "suggested_delay_minutes": null または 追加で待つべき分数（例: 5）
 }}
 """
 

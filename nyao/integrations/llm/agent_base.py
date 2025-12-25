@@ -55,15 +55,15 @@ class NyaoAgent(Agent):
     def call_llm(
         self,
         messages: list[dict[str, str]],
-        temperature: float = 0.7,
-        max_tokens: int = 1000,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
     ) -> LLMResponse:
         """LLMを呼び出す
 
         Args:
             messages: OpenAI形式のメッセージリスト
-            temperature: 生成の多様性パラメータ
-            max_tokens: 最大トークン数
+            temperature: 生成の多様性パラメータ（Noneの場合はdefault_paramsを使用）
+            max_tokens: 最大トークン数（Noneの場合はdefault_paramsを使用）
 
         Returns:
             LLMResponse: LLM応答データ
@@ -125,25 +125,25 @@ class NyaoAgent(Agent):
     def _invoke_agent(
         self,
         prompt: str,
-        temperature: float,
-        max_tokens: int,
+        temperature: float | None,
+        max_tokens: int | None,
     ) -> Any:
         """エージェントを呼び出す（テスト用にオーバーライド可能）
 
         Args:
             prompt: プロンプト文字列
-            temperature: 生成の多様性パラメータ
-            max_tokens: 最大トークン数
+            temperature: 生成の多様性パラメータ（Noneの場合はdefault_paramsを使用）
+            max_tokens: 最大トークン数（Noneの場合はdefault_paramsを使用）
 
         Returns:
             エージェントのレスポンス
         """
-        # default_paramsをベースに、呼び出し時のパラメータで上書き
-        model_params = {
-            **self.default_params,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-        }
+        # default_paramsをベースに、Noneでないパラメータで上書き
+        model_params = {**self.default_params}
+        if temperature is not None:
+            model_params["temperature"] = temperature
+        if max_tokens is not None:
+            model_params["max_tokens"] = max_tokens
 
         # strands Agentの__call__を使用し、生成パラメータを渡す
         return self(prompt, model_params=model_params)
