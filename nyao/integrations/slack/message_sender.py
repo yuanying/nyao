@@ -4,7 +4,6 @@ Slackチャンネルにメッセージを送信します。
 """
 
 import asyncio
-
 from typing import Any, cast
 
 from slack_sdk.errors import SlackApiError
