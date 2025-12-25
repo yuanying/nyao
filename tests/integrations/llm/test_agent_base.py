@@ -45,7 +45,8 @@ slack:
     - C1234567890
 litellm:
   model_id: openai/gpt-4o
-  api_key: $OPENAI_API_KEY
+  client_args:
+    api_key: $OPENAI_API_KEY
   params:
     temperature: 0.7
     max_tokens: 1000
@@ -88,7 +89,7 @@ class TestNyaoAgentCallLLM:
             mock_response.metrics.inputTokens = 100
             mock_response.metrics.outputTokens = 50
 
-            setattr(agent, "_mock_response", mock_response)
+            agent._mock_response = mock_response  # type: ignore[attr-defined]
             yield agent
 
     def test_call_llm_success(self, mock_agent):

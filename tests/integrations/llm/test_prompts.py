@@ -25,7 +25,7 @@ slack:
   channel_ids:
     - C1234567890
 litellm:
-  model: openai/gpt-4o
+  model_id: openai/gpt-4o
 bot:
   persona: テスト用ペルソナ
 """)

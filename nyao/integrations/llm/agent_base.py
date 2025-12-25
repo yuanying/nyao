@@ -204,12 +204,12 @@ class NyaoAgent(Agent):
         Returns:
             設定に基づいて初期化されたNyaoAgent
         """
-        litellm_config = settings.litellm
+        litellm_settings = settings.litellm
 
-        model_id = litellm_config.get("model_id", "openai/gpt-4o")
-        api_key = litellm_config.get("api_key")
-        api_base = litellm_config.get("api_base")
-        params = litellm_config.get("params", {})
+        model_id = litellm_settings.model_id
+        api_key = litellm_settings.client_args.get("api_key")
+        api_base = litellm_settings.client_args.get("api_base")
+        params = litellm_settings.params
 
         return cls(
             model_id=model_id,

@@ -33,7 +33,8 @@ slack:
     - C1234567890
 litellm:
   model_id: openai/gpt-4o
-  api_key: $OPENAI_API_KEY
+  client_args:
+    api_key: $OPENAI_API_KEY
 bot:
   persona: テスト用ペルソナ
 """)
