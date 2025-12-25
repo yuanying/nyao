@@ -47,12 +47,14 @@ slack:
     - "C123456"
     - "C789012"
 
-# LLM設定（LiteLLMの設定を直接パススルー）
+# LLM設定（strands-agents LiteLLMModel形式）
 litellm:
-  model: "openai/gpt-4o"  # プロバイダー/モデル形式
-  api_key: "$OPENAI_API_KEY"  # プレフィックスに `$` がついた場合は環境変数を設定する
-  temperature: 0.7
-  max_tokens: 1000
+  model_id: "openai/gpt-4o"  # 必須: プロバイダー/モデル形式
+  client_args:  # オプション: LiteLLMクライアント引数
+    api_key: "$OPENAI_API_KEY"  # $プレフィックスで環境変数を参照
+  params:  # オプション: モデルパラメータ
+    temperature: 0.7
+    max_tokens: 1000
 
 # Bot動作設定
 bot:

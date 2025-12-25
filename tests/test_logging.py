@@ -21,7 +21,7 @@ class TestLoggingSetup:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -52,7 +52,7 @@ class TestLoggingSetup:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -82,7 +82,7 @@ class TestLoggingSetup:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -112,7 +112,7 @@ class TestLoggingSetup:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -143,7 +143,7 @@ class TestLoggingSetup:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -177,7 +177,7 @@ class TestLogFormatting:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -217,7 +217,7 @@ class TestLogFormatting:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -254,7 +254,7 @@ class TestLogFormatting:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -290,7 +290,7 @@ class TestLogFormatting:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -322,7 +322,7 @@ class TestLogFormatting:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -358,7 +358,7 @@ class TestSensitiveDataMasking:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -390,7 +390,7 @@ class TestSensitiveDataMasking:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -422,7 +422,7 @@ class TestSensitiveDataMasking:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -454,7 +454,7 @@ class TestSensitiveDataMasking:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -486,7 +486,7 @@ class TestSensitiveDataMasking:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -518,7 +518,7 @@ class TestSensitiveDataMasking:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -550,7 +550,7 @@ class TestSensitiveDataMasking:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -582,7 +582,7 @@ class TestSensitiveDataMasking:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -615,7 +615,7 @@ class TestSensitiveDataMasking:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -654,7 +654,7 @@ class TestSensitiveDataMasking:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -693,7 +693,7 @@ class TestSensitiveDataMasking:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -731,7 +731,7 @@ class TestLogLevelFiltering:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -766,7 +766,7 @@ class TestLogLevelFiltering:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -801,7 +801,7 @@ class TestLogLevelFiltering:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -838,7 +838,7 @@ class TestLogLevelFiltering:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -875,7 +875,7 @@ class TestLogLevelFiltering:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -914,7 +914,7 @@ class TestContextInformation:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -949,7 +949,7 @@ class TestContextInformation:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
@@ -988,7 +988,7 @@ class TestContextInformation:
         config_file = tmp_path / "config.yaml"
         config_data = {
             "slack": {"channel_ids": ["C123456"]},
-            "litellm": {"model": "openai/gpt-4o"},
+            "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
             yaml.dump(config_data, f)
