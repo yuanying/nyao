@@ -213,7 +213,7 @@ LLM APIへの実際の通信は行わず、`unittest.mock.AsyncMock`と`patch`�
 ```toml
 [tool.uv.dependencies]
 strands-agents = "^0.1"  # エージェントフレームワーク
-litellm = "^1.0"  # LLMプロバイダー統合
+litellm = "^1.80"  # LLMプロバイダー統合
 openai = "^1.0"  # OpenAI API（LiteLLMの依存）
 anthropic = "^0.25"  # Anthropic Claude API
 ```

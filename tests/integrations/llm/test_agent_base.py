@@ -249,6 +249,101 @@ class TestNyaoAgentRetry:
                 assert mock_agent_instance.call_count == 1
 
 
+class TestNyaoAgentStructuredOutput:
+    """structured_outputメソッドのテスト"""
+
+    @pytest.mark.asyncio
+    async def test_structured_output_returns_pydantic_model(
+        self, litellm_settings: LiteLLMSettings
+    ):
+        """Pydanticモデルが返されること"""
+        from pydantic import BaseModel
+
+        class TestModel(BaseModel):
+            name: str
+            value: int
+
+        with patch("nyao.integrations.llm.agent_base.Agent") as mock_agent_class:
+            with patch("nyao.integrations.llm.agent_base.LiteLLMModel"):
+                mock_agent_instance = MagicMock()
+                mock_agent_instance.structured_output.return_value = TestModel(
+                    name="test", value=42
+                )
+                mock_agent_class.return_value = mock_agent_instance
+
+                agent = NyaoAgent(settings=litellm_settings)
+                result = await agent.structured_output(TestModel, "テストプロンプト")
+
+                assert isinstance(result, TestModel)
+                assert result.name == "test"
+                assert result.value == 42
+
+    @pytest.mark.asyncio
+    async def test_structured_output_passes_prompt(self, litellm_settings: LiteLLMSettings):
+        """promptがstrands.Agent.structured_outputに渡されること"""
+        from pydantic import BaseModel
+
+        class TestModel(BaseModel):
+            name: str
+
+        with patch("nyao.integrations.llm.agent_base.Agent") as mock_agent_class:
+            with patch("nyao.integrations.llm.agent_base.LiteLLMModel"):
+                mock_agent_instance = MagicMock()
+                mock_agent_instance.structured_output.return_value = TestModel(name="test")
+                mock_agent_class.return_value = mock_agent_instance
+
+                agent = NyaoAgent(settings=litellm_settings)
+                await agent.structured_output(TestModel, "テストプロンプト")
+
+                mock_agent_instance.structured_output.assert_called_once_with(
+                    TestModel, "テストプロンプト"
+                )
+
+    @pytest.mark.asyncio
+    async def test_structured_output_with_custom_temperature(
+        self, litellm_settings: LiteLLMSettings
+    ):
+        """カスタムtemperatureが使用されること"""
+        from pydantic import BaseModel
+
+        class TestModel(BaseModel):
+            name: str
+
+        with patch("nyao.integrations.llm.agent_base.Agent") as mock_agent_class:
+            with patch("nyao.integrations.llm.agent_base.LiteLLMModel") as mock_model_class:
+                mock_agent_instance = MagicMock()
+                mock_agent_instance.structured_output.return_value = TestModel(name="test")
+                mock_agent_class.return_value = mock_agent_instance
+
+                mock_model_instance = MagicMock()
+                mock_model_class.return_value = mock_model_instance
+
+                agent = NyaoAgent(settings=litellm_settings)
+                await agent.structured_output(TestModel, "テストプロンプト", temperature=0.3)
+
+                mock_model_instance.update_config.assert_called_once_with(temperature=0.3)
+
+    @pytest.mark.asyncio
+    async def test_structured_output_raises_llm_api_error(self, litellm_settings: LiteLLMSettings):
+        """エラー時にLLMAPIErrorがスローされること"""
+        from pydantic import BaseModel
+
+        class TestModel(BaseModel):
+            name: str
+
+        with patch("nyao.integrations.llm.agent_base.Agent") as mock_agent_class:
+            with patch("nyao.integrations.llm.agent_base.LiteLLMModel"):
+                mock_agent_instance = MagicMock()
+                error = _MockAPIError("API Error", 401)
+                mock_agent_instance.structured_output.side_effect = error
+                mock_agent_class.return_value = mock_agent_instance
+
+                agent = NyaoAgent(settings=litellm_settings)
+
+                with pytest.raises(LLMAPIError):
+                    await agent.structured_output(TestModel, "テストプロンプト")
+
+
 class TestNyaoAgentErrorHandling:
     """エラーハンドリングのテスト"""
 
