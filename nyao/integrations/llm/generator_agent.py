@@ -47,13 +47,15 @@ class ResponseGeneratorAgent:
     async def generate_response(
         self,
         message: SlackMessage,
-        context: ConversationContext | None = None,
+        thread_context: ConversationContext | None = None,
+        channel_context: ConversationContext | None = None,
     ) -> LLMResponse:
         """メッセージに対する応答を生成
 
         Args:
             message: 返信対象のSlackメッセージ
-            context: 会話コンテキスト（オプション）
+            thread_context: スレッドコンテキスト（オプション）
+            channel_context: チャンネルコンテキスト（オプション）
 
         Returns:
             LLMResponse: 生成された応答
@@ -64,13 +66,15 @@ class ResponseGeneratorAgent:
         logger.debug(
             "generate_response_start",
             message_id=message.message_id,
-            has_context=context is not None,
+            has_thread_context=thread_context is not None,
+            has_channel_context=channel_context is not None,
         )
 
         # プロンプトを構築
         prompt = self._prompt_manager.build_response_generation_prompt(
             message=message,
-            context=context,
+            thread_context=thread_context,
+            channel_context=channel_context,
         )
 
         # LLMを呼び出し（エラーはそのままスロー）

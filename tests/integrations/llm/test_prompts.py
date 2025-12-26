@@ -171,33 +171,52 @@ class TestBuildResponseGenerationPrompt:
         )
 
     @pytest.fixture
-    def sample_context(self, sample_message: SlackMessage) -> ConversationContext:
-        """テスト用ConversationContext"""
-        past_message = SlackMessage(
-            message_id="msg-000",
+    def sample_thread_context(self) -> ConversationContext:
+        """テスト用スレッドコンテキスト"""
+        thread_message = SlackMessage(
+            message_id="msg-thread-001",
             channel_id="C12345678",
+            thread_ts="1234567890.123456",
             user_id="U87654321",
-            user_name="otheruser",
-            text="おはよう！",
+            user_name="alice",
+            text="スレッドでの会話です",
             timestamp=datetime.now(UTC),
         )
-        context = ConversationContext(
+        return ConversationContext(
             channel_id="C12345678",
+            thread_ts="1234567890.123456",
             last_updated=datetime.now(UTC),
-            messages=[past_message, sample_message],
+            messages=[thread_message],
         )
-        return context
+
+    @pytest.fixture
+    def sample_channel_context(self) -> ConversationContext:
+        """テスト用チャンネルコンテキスト"""
+        channel_message = SlackMessage(
+            message_id="msg-channel-001",
+            channel_id="C12345678",
+            user_id="U11111111",
+            user_name="bob",
+            text="チャンネルでの会話です",
+            timestamp=datetime.now(UTC),
+        )
+        return ConversationContext(
+            channel_id="C12345678",
+            thread_ts=None,
+            last_updated=datetime.now(UTC),
+            messages=[channel_message],
+        )
 
     def test_prompt_contains_persona(
         self,
         manager: PromptManager,
         sample_message: SlackMessage,
-        sample_context: ConversationContext,
+        sample_thread_context: ConversationContext,
     ) -> None:
         """プロンプトにペルソナが含まれること"""
         prompt = manager.build_response_generation_prompt(
             message=sample_message,
-            context=sample_context,
+            thread_context=sample_thread_context,
         )
 
         assert manager.persona in prompt
@@ -206,31 +225,61 @@ class TestBuildResponseGenerationPrompt:
         self,
         manager: PromptManager,
         sample_message: SlackMessage,
-        sample_context: ConversationContext,
+        sample_thread_context: ConversationContext,
     ) -> None:
         """プロンプトに返信対象メッセージが含まれること"""
         prompt = manager.build_response_generation_prompt(
             message=sample_message,
-            context=sample_context,
+            thread_context=sample_thread_context,
         )
 
         assert sample_message.text in prompt
         assert sample_message.user_name in prompt
 
-    def test_prompt_contains_context_messages(
+    def test_prompt_contains_thread_context(
         self,
         manager: PromptManager,
         sample_message: SlackMessage,
-        sample_context: ConversationContext,
+        sample_thread_context: ConversationContext,
     ) -> None:
-        """プロンプトにコンテキストメッセージが含まれること"""
+        """プロンプトにスレッドコンテキストが含まれること"""
         prompt = manager.build_response_generation_prompt(
             message=sample_message,
-            context=sample_context,
+            thread_context=sample_thread_context,
         )
 
-        # コンテキストの過去メッセージも含まれること
-        assert "おはよう" in prompt
+        assert "スレッドでの会話です" in prompt
+
+    def test_prompt_contains_channel_context(
+        self,
+        manager: PromptManager,
+        sample_message: SlackMessage,
+        sample_channel_context: ConversationContext,
+    ) -> None:
+        """プロンプトにチャンネルコンテキストが含まれること"""
+        prompt = manager.build_response_generation_prompt(
+            message=sample_message,
+            channel_context=sample_channel_context,
+        )
+
+        assert "チャンネルでの会話です" in prompt
+
+    def test_prompt_contains_both_contexts(
+        self,
+        manager: PromptManager,
+        sample_message: SlackMessage,
+        sample_thread_context: ConversationContext,
+        sample_channel_context: ConversationContext,
+    ) -> None:
+        """プロンプトに両方のコンテキストが含まれること"""
+        prompt = manager.build_response_generation_prompt(
+            message=sample_message,
+            thread_context=sample_thread_context,
+            channel_context=sample_channel_context,
+        )
+
+        assert "スレッドでの会話です" in prompt
+        assert "チャンネルでの会話です" in prompt
 
     def test_prompt_without_context(
         self, manager: PromptManager, sample_message: SlackMessage
@@ -238,7 +287,6 @@ class TestBuildResponseGenerationPrompt:
         """コンテキストなしでもプロンプトが構築できること"""
         prompt = manager.build_response_generation_prompt(
             message=sample_message,
-            context=None,
         )
 
         assert sample_message.text in prompt

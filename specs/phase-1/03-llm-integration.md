@@ -87,7 +87,8 @@ Phase 1では「応答すべきかどうか」のみを判定しますが、Phas
 **応答生成プロンプト** (`RESPONSE_GENERATION_PROMPT`):
 - ボットのペルソナ設定
 - 返信ガイドライン（カジュアルな口調、1-3文程度等）
-- 会話のコンテキスト（過去の会話履歴）
+- チャンネルの最近の会話（チャンネルコンテキスト）
+- スレッドの会話（スレッドコンテキスト）
 - 返信対象のメッセージ
 
 #### 主要インターフェース
@@ -95,7 +96,7 @@ Phase 1では「応答すべきかどうか」のみを判定しますが、Phas
 **PromptManagerクラス**:
 - `__init__(persona)`: 初期化
 - `build_should_respond_prompt(message, elapsed_seconds, reaction_count, reply_count)`: 応答判定用プロンプト文字列を構築して返す
-- `build_response_generation_prompt(message, context)`: 応答生成用プロンプト文字列を構築して返す
+- `build_response_generation_prompt(message, thread_context, channel_context)`: 応答生成用プロンプト文字列を構築して返す
 
 #### テスト要件
 
@@ -118,7 +119,7 @@ Phase 1では「応答すべきかどうか」のみを判定しますが、Phas
 - `judge_should_respond(message, elapsed_seconds, reaction_count, reply_count)`: 応答すべきかどうかを判定し、ResponseDecisionを返す
   - temperature=0.3で一貫性を重視
   - max_tokens=200
-- `generate_response(message, context)`: 応答メッセージを生成し、LLMResponseを返す
+- `generate_response(message, thread_context, channel_context)`: 応答メッセージを生成し、LLMResponseを返す
   - temperature=0.8で多様性を重視
   - max_tokens=300
 - `_parse_json_response(content)`: LLMのJSON形式レスポンスをパース
