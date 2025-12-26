@@ -5,12 +5,11 @@
 
 import os
 import random
-import re
 from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,18 +21,13 @@ class ResponseDelaySettings(BaseModel):
 
 
 class SlackSettings(BaseModel):
-    """Slack設定"""
+    """Slack設定
 
-    channel_ids: list[str] = Field(description="監視対象チャンネルIDのリスト")
+    Note: Phase 1ではAppがinviteされたチャンネルを自動的に監視するため、
+    チャンネルIDの明示的な設定は不要です。将来的な拡張のために設定クラスを保持しています。
+    """
 
-    @field_validator("channel_ids")
-    @classmethod
-    def validate_channel_ids(cls, v: list[str]) -> list[str]:
-        """チャンネルIDのフォーマットを検証"""
-        for channel_id in v:
-            if not re.match(r"^C[A-Z0-9]+$", channel_id):
-                raise ValueError(f"Invalid channel ID format: {channel_id}")
-        return v
+    pass
 
 
 class BotSettings(BaseModel):
@@ -82,7 +76,7 @@ class Settings(BaseSettings):
     config: str = Field(default="config.yaml", description="設定ファイルのパス")
 
     # YAMLファイルから読み込む設定
-    slack: SlackSettings
+    slack: SlackSettings = Field(default_factory=SlackSettings)
     litellm: LiteLLMSettings
     bot: BotSettings = Field(default_factory=BotSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
