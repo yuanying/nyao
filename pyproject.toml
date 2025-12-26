@@ -10,6 +10,8 @@ dependencies = [
     "structlog>=23.0",
     "pyyaml>=6.0",
     "strands-agents[litellm]>=0.1.0",
+    "slack-bolt>=1.18",
+    "slack-sdk>=3.27",
 ]
 
 [build-system]
