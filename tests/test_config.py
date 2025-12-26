@@ -8,7 +8,6 @@ from nyao.config.settings import (
     BotSettings,
     LiteLLMSettings,
     LoggingSettings,
-    SlackSettings,
     get_response_delay_with_jitter,
     get_settings,
     reload_settings,
@@ -27,7 +26,6 @@ class TestSettings:
         # 最小限の設定ファイルを作成
         config_file = tmp_path / "config.yaml"
         config_data = {
-            "slack": {"channel_ids": ["C123456"]},
             "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
@@ -49,7 +47,6 @@ class TestSettings:
 
         config_file = tmp_path / "config.yaml"
         config_data = {
-            "slack": {"channel_ids": ["C123456", "C789012"]},
             "litellm": {
                 "model_id": "openai/gpt-4o",
                 "params": {"temperature": 0.8, "max_tokens": 2000},
@@ -65,7 +62,6 @@ class TestSettings:
         reload_settings()
         settings = get_settings()
 
-        assert settings.slack.channel_ids == ["C123456", "C789012"]
         assert settings.litellm.model_id == "openai/gpt-4o"
         assert settings.litellm.params["temperature"] == 0.8
         assert settings.litellm.params["max_tokens"] == 2000
@@ -82,7 +78,6 @@ class TestSettings:
 
         config_file = tmp_path / "config.yaml"
         config_data = {
-            "slack": {"channel_ids": ["C123456"]},
             "litellm": {
                 "model_id": "openai/gpt-4o",
                 "client_args": {"api_key": "$OPENAI_API_KEY"},
@@ -106,7 +101,6 @@ class TestSettings:
         # 最小限の設定ファイル（デフォルト値を使用）
         config_file = tmp_path / "config.yaml"
         config_data = {
-            "slack": {"channel_ids": ["C123456"]},
             "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
@@ -130,7 +124,6 @@ class TestSettings:
 
         config_file = tmp_path / "config.yaml"
         config_data = {
-            "slack": {"channel_ids": ["C123456"]},
             "litellm": {"model_id": "openai/gpt-4o"},
         }
         with open(config_file, "w") as f:
@@ -148,7 +141,6 @@ class TestSettings:
 
         config_file = tmp_path / "config.yaml"
         config_data = {
-            "slack": {"channel_ids": ["C123456"]},
             "litellm": {"model_id": "openai/gpt-4o"},
             "bot": {"response_delay": {"base": 60, "jitter": 10}},
         }
@@ -163,20 +155,6 @@ class TestSettings:
         for _ in range(10):
             delay = get_response_delay_with_jitter()
             assert 50 <= delay <= 70  # base(60) - jitter(10) から base(60) + jitter(10)
-
-
-class TestSlackSettings:
-    """Slack設定のテスト"""
-
-    def test_valid_channel_ids(self):
-        """正しいチャンネルIDが受け入れられること"""
-        settings = SlackSettings(channel_ids=["C123456", "C789012"])
-        assert len(settings.channel_ids) == 2
-
-    def test_invalid_channel_ids_raises_error(self):
-        """不正なチャンネルIDが拒否されること"""
-        with pytest.raises(ValidationError):
-            SlackSettings(channel_ids=["invalid-id"])
 
 
 class TestBotSettings:

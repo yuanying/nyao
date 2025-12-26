@@ -2,10 +2,9 @@
 # このファイルをconfig.yamlとしてコピーして使用してください
 
 # Slack設定
-slack:
-  channel_ids:  # 監視対象チャンネルIDのリスト
-    - "C123456"
-    - "C789012"
+# Note: Appがinviteされたチャンネルを自動的に監視します。
+#       明示的なチャンネルID設定は不要です。
+slack: {}
 
 # LLM設定（strands-agents LiteLLMModel形式）
 litellm:
