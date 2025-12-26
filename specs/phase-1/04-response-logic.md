@@ -51,7 +51,7 @@ LLMによる判定
 - `__init__(llm_caller, response_delay=60)`: 初期化
 - `should_respond_to_message(message, reactions, reply_count)`: メッセージに応答すべきか判定し、ResponseDecisionを返す
   - 基本条件チェック（空メッセージ、短すぎるメッセージを除外）
-  - 既存の反応（リアクション、返信）がある場合は応答しない
+  - リアクション数、返信数はLLMの判定材料として渡す（事前に拒否しない）
   - LLMによる判定を実行
 - `_check_basic_conditions(message)`: 基本条件チェック（メッセージが空でない、3文字以上）
 - `_calculate_elapsed_time(message)`: メッセージ投稿からの経過時間を計算
@@ -59,7 +59,7 @@ LLMによる判定
 #### テスト要件
 
 - 基本条件チェックが正しく動作すること
-- 反応がある場合は応答しないと判定されること
+- リアクション数、返信数がLLMに正しく渡されること
 - LLMによる判定が正しく実行されること
 - 経過時間が正しく計算されること
 
@@ -208,7 +208,7 @@ nyao/
 
 - [ ] `services/response_judge.py`の実装
 - [ ] 基本条件チェック
-- [ ] 反応状況の確認
+- [ ] 反応状況をLLMに渡す
 - [ ] LLMによる判定呼び出し
 - [ ] テストコードの作成
 
@@ -242,7 +242,7 @@ nyao/
 
 **tests/services/test_response_judge.py**:
 - 基本条件チェックが正しく動作すること
-- 反応がある場合は応答しないこと
+- リアクション数、返信数がLLMに渡されること
 
 **tests/services/test_response_generator.py**:
 - 応答が正しく生成されること
