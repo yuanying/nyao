@@ -9,6 +9,7 @@ dependencies = [
     "pydantic-settings>=2.0",
     "structlog>=23.0",
     "pyyaml>=6.0",
+    "strands-agents[litellm]>=0.1.0",
 ]
 
 [build-system]

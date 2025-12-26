@@ -49,9 +49,9 @@ strands-agentsを使用したエージェント基盤を構築し、すべての
 
 #### 主要インターフェース
 
-**NyaoAgentクラス** (strands-agents.Agentを継承):
-- `__init__(model, api_key, config)`: 初期化
-- `call_llm(messages, temperature, max_tokens)`: LiteLLMを使用してLLMを呼び出す
+**NyaoAgentクラス** (strands-agentsのAgentをラップ):
+- `__init__(settings, system_prompt)`: LiteLLMSettingsとシステムプロンプトで初期化
+- `call_llm(prompt, temperature, max_tokens)`: strands.Agentを使用してLLMを呼び出す
 
 #### テスト要件
 
@@ -94,8 +94,8 @@ Phase 1では「応答すべきかどうか」のみを判定しますが、Phas
 
 **PromptManagerクラス**:
 - `__init__(persona)`: 初期化
-- `build_should_respond_prompt(message, elapsed_seconds, reaction_count, reply_count)`: 応答判定用プロンプトを構築しOpenAI形式で返す
-- `build_response_generation_prompt(message, context)`: 応答生成用プロンプトを構築しOpenAI形式で返す
+- `build_should_respond_prompt(message, elapsed_seconds, reaction_count, reply_count)`: 応答判定用プロンプト文字列を構築して返す
+- `build_response_generation_prompt(message, context)`: 応答生成用プロンプト文字列を構築して返す
 
 #### テスト要件
 

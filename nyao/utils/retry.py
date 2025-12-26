@@ -22,6 +22,7 @@ async def retry_async(
     delay: float = 1.0,
     backoff: float = 2.0,
     exceptions: tuple[type[Exception], ...] = (Exception,),
+    skip_on: Callable[[Exception], bool] | None = None,
     **kwargs: Any,
 ) -> T:
     """非同期関数をリトライ実行
@@ -33,6 +34,7 @@ async def retry_async(
         delay: 初回リトライまでの待機時間（秒）
         backoff: リトライごとの待機時間の倍率
         exceptions: リトライ対象の例外タプル
+        skip_on: 例外を受け取り、Trueを返すとリトライをスキップする関数
         **kwargs: 関数のキーワード引数
 
     Returns:
@@ -56,6 +58,10 @@ async def retry_async(
                 return cast(T, result)
         except exceptions as e:
             last_exception = e
+
+            # skip_onがTrueを返す場合はリトライせずに即座に例外を再送出
+            if skip_on is not None and skip_on(e):
+                raise
 
             if attempt >= max_retries:
                 logger.error(
