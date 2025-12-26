@@ -24,7 +24,6 @@
 #### 機能要件
 
 - **FR-008**: 環境変数またはConfigMapで以下を設定可能
-  - 監視対象チャンネルのリスト
   - 応答判定の待機時間
   - 使用するLLMモデル
   - ボットのペルソナ設定
@@ -41,12 +40,6 @@
 設定ファイル（YAML形式）では以下を設定可能：
 
 ```yaml
-# Slack設定
-slack:
-  channel_ids:  # 監視対象チャンネルIDのリスト
-    - "C123456"
-    - "C789012"
-
 # LLM設定（strands-agents LiteLLMModel形式）
 litellm:
   model_id: "openai/gpt-4o"  # 必須: プロバイダー/モデル形式
