@@ -253,8 +253,6 @@ class ChannelLongTermMemory(SQLModel, table=True):
     channel_name: str
     purpose: str
     typical_topics: list[str] = Field(sa_type=JSON)
-    communication_style: str
-    activity_pattern: str
     historical_summary: str = Field(sa_column=Column(Text))
     important_events: list[dict] = Field(sa_type=JSON)
     last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -270,8 +268,6 @@ class UserLongTermMemory(SQLModel, table=True):
     user_name: str
     interests: list[str] = Field(sa_type=JSON)
     expertise: list[str] = Field(sa_type=JSON)
-    communication_style: str
-    frequent_channels: list[str] = Field(sa_type=JSON)
     last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
 ```
 
@@ -352,6 +348,12 @@ class UserLongTermMemory(SQLModel, table=True):
 ## ドキュメント構成
 
 - [README.md](./README.md) - 本ドキュメント（Phase 2全体像）
+- [implementation-plan.md](./implementation-plan.md) - 実装計画（Week 1-4）
+- [01-litellm-migration.md](./01-litellm-migration.md) - LiteLLM直接使用への移行設計
+- [02-smart-response.md](./02-smart-response.md) - スマート応答判定設計
+- [03-memory-models.md](./03-memory-models.md) - 階層的記憶のデータモデル設計
+- [04-memory-services.md](./04-memory-services.md) - 記憶管理サービス設計
+- [05-batch-processing.md](./05-batch-processing.md) - 日次要約バッチ処理設計
 
 ## 参考資料
 
