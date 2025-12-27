@@ -38,11 +38,11 @@ uv run pytest
 
 ### 主要ライブラリ
 - **Slack連携**: slack-sdk または slack-bolt
-- **LLM連携**: strands-agents + litellm（複数のLLMプロバイダー対応）
+- **LLM連携**: litellm（直接使用）
 - **非同期処理**: asyncio + aiohttp
 - **データベース**:
-  - Phase 1: SQLite（MVP）
-  - Phase 2: PostgreSQL（本番環境）
+  - Phase 1〜2: SQLite
+  - Phase 3以降: PostgreSQL（本番環境、オプション）
 - **ORマッパー**: SQLModel（SQLAlchemy 2.0 + Pydantic統合）
 - **ロギング**: structlog（構造化ログ、JSON形式）
 
