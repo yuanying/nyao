@@ -215,18 +215,24 @@ class TestDelayedCallback:
         self,
         controller_short_delay: ResponseDelayController,
         sample_message: SlackMessage,
+        mock_asyncio_sleep: AsyncMock,
     ) -> None:
         """遅延後にコールバックが実行されること"""
         callback = AsyncMock()
         controller_short_delay.schedule_response_check(sample_message, callback)
 
-        # コールバックがまだ実行されていないこと
-        await asyncio.sleep(0.5)
-        callback.assert_not_called()
+        # タスクがスケジュールされたことを確認
+        assert controller_short_delay.get_pending_count() == 1
 
-        # 遅延後にコールバックが実行されること
-        await asyncio.sleep(1.0)
+        # イベントループを回してタスクを完了させる
+        # （asyncio.sleepがモックされているため即座に完了）
+        await asyncio.sleep(0)
+
+        # コールバックが実行されること
         callback.assert_called_once_with(sample_message)
+
+        # 正しい遅延時間でsleepが呼ばれたことを確認
+        mock_asyncio_sleep.assert_any_call(controller_short_delay.delay_seconds)
 
     async def test_callback_receives_correct_message(
         self,
@@ -242,7 +248,8 @@ class TestDelayedCallback:
 
         controller_short_delay.schedule_response_check(sample_message, capture_callback)
 
-        await asyncio.sleep(1.5)
+        # イベントループを回してタスクを完了させる
+        await asyncio.sleep(0)
 
         assert received_message is not None
         assert received_message.message_id == sample_message.message_id
@@ -259,7 +266,8 @@ class TestDelayedCallback:
 
         assert controller_short_delay.get_pending_count() == 1
 
-        await asyncio.sleep(1.5)
+        # イベントループを回してタスクを完了させる
+        await asyncio.sleep(0)
 
         assert controller_short_delay.get_pending_count() == 0
 

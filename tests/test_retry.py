@@ -1,6 +1,5 @@
 """リトライ機能のテストコード"""
 
-import asyncio
 from unittest.mock import AsyncMock
 
 import pytest
@@ -72,38 +71,36 @@ class TestRetryAsyncBackoff:
     """retry_asyncのバックオフ検証のテスト"""
 
     @pytest.mark.asyncio
-    async def test_retry_async_backoff_timing(self):
+    async def test_retry_async_backoff_timing(self, mock_asyncio_sleep):
         """指数バックオフが正しく動作すること"""
         mock_func = AsyncMock(
             side_effect=[CustomError("Error 1"), CustomError("Error 2"), "success"]
         )
 
-        start_time = asyncio.get_event_loop().time()
         result = await retry_async(
             mock_func, max_retries=3, delay=0.1, backoff=2.0, exceptions=(CustomError,)
         )
-        elapsed_time = asyncio.get_event_loop().time() - start_time
 
         assert result == "success"
+        # sleepが正しい遅延時間で呼ばれたことを確認
         # 1回目のリトライ: 0.1秒, 2回目のリトライ: 0.2秒
-        # 合計: 0.3秒以上（多少の誤差を考慮）
-        assert elapsed_time >= 0.25
+        sleep_delays = mock_asyncio_sleep.get_sleep_delays()
+        assert 0.1 in sleep_delays  # 1回目のリトライ
+        assert 0.2 in sleep_delays  # 2回目のリトライ
 
     @pytest.mark.asyncio
-    async def test_retry_async_custom_delay(self):
+    async def test_retry_async_custom_delay(self, mock_asyncio_sleep):
         """カスタム遅延時間が使用されること"""
         mock_func = AsyncMock(side_effect=[CustomError("Error"), "success"])
 
-        start_time = asyncio.get_event_loop().time()
         result = await retry_async(mock_func, max_retries=3, delay=0.05, exceptions=(CustomError,))
-        elapsed_time = asyncio.get_event_loop().time() - start_time
 
         assert result == "success"
-        # 0.05秒以上待機している
-        assert elapsed_time >= 0.04
+        # 0.05秒でsleepが呼ばれたことを確認
+        mock_asyncio_sleep.assert_any_call(0.05)
 
     @pytest.mark.asyncio
-    async def test_retry_async_custom_backoff(self):
+    async def test_retry_async_custom_backoff(self, mock_asyncio_sleep):
         """カスタムバックオフ倍率が使用されること"""
         mock_func = AsyncMock(
             side_effect=[
@@ -114,16 +111,17 @@ class TestRetryAsyncBackoff:
             ]
         )
 
-        start_time = asyncio.get_event_loop().time()
         result = await retry_async(
             mock_func, max_retries=4, delay=0.05, backoff=3.0, exceptions=(CustomError,)
         )
-        elapsed_time = asyncio.get_event_loop().time() - start_time
 
         assert result == "success"
+        # sleepが正しい遅延時間で呼ばれたことを確認
         # 1回目: 0.05秒, 2回目: 0.15秒, 3回目: 0.45秒
-        # 合計: 0.65秒以上
-        assert elapsed_time >= 0.60
+        sleep_delays = mock_asyncio_sleep.get_sleep_delays()
+        assert any(pytest.approx(0.05) == d for d in sleep_delays)
+        assert any(pytest.approx(0.15) == d for d in sleep_delays)
+        assert any(pytest.approx(0.45) == d for d in sleep_delays)
 
 
 class TestWithRetryDecorator:

@@ -120,6 +120,9 @@ class TestSettings:
     def test_missing_required_fields_raises_error(self, tmp_path, monkeypatch):
         """必須項目が欠けている場合にエラーが発生すること"""
         # SLACK_BOT_TOKENが欠けている
+        # .envファイルからの読み込みを防ぐため作業ディレクトリを変更
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("SLACK_BOT_TOKEN", raising=False)
         monkeypatch.setenv("SLACK_APP_TOKEN", "xapp-test-token")
 
         config_file = tmp_path / "config.yaml"
