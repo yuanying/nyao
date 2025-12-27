@@ -53,8 +53,11 @@ RESPONSE_GENERATION_PROMPT_TEMPLATE = """## あなたのペルソナ
 - 押しつけがましくならない
 - 質問には適切に答える
 
-## 会話のコンテキスト
-{context}
+## チャンネルの最近の会話
+{channel_context}
+
+## スレッドの会話
+{thread_context}
 
 ## 返信対象のメッセージ
 投稿者: {user_name}
@@ -114,24 +117,28 @@ class PromptManager:
     def build_response_generation_prompt(
         self,
         message: SlackMessage,
-        context: ConversationContext | None = None,
+        thread_context: ConversationContext | None = None,
+        channel_context: ConversationContext | None = None,
     ) -> str:
         """応答生成用プロンプトを構築
 
         Args:
             message: 返信対象のSlackメッセージ
-            context: 会話コンテキスト（オプション）
+            thread_context: スレッドコンテキスト（オプション）
+            channel_context: チャンネルコンテキスト（オプション）
 
         Returns:
             構築されたプロンプト文字列
         """
-        context_str = self._format_context(context)
+        thread_context_str = self._format_context(thread_context)
+        channel_context_str = self._format_context(channel_context)
 
         return RESPONSE_GENERATION_PROMPT_TEMPLATE.format(
             persona=self.persona,
             user_name=message.user_name,
             text=message.text,
-            context=context_str,
+            thread_context=thread_context_str,
+            channel_context=channel_context_str,
         )
 
     def _format_context(self, context: ConversationContext | None) -> str:

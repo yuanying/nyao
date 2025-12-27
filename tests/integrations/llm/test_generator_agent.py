@@ -40,11 +40,31 @@ def sample_message() -> SlackMessage:
 
 
 @pytest.fixture
-def sample_context(sample_message: SlackMessage) -> ConversationContext:
-    """テスト用ConversationContext"""
+def sample_thread_context(sample_message: SlackMessage) -> ConversationContext:
+    """テスト用スレッドコンテキスト"""
     return ConversationContext(
         channel_id="C12345678",
+        thread_ts="1234567890.123456",
         messages=[sample_message],
+        last_updated=datetime.now(UTC),
+    )
+
+
+@pytest.fixture
+def sample_channel_context() -> ConversationContext:
+    """テスト用チャンネルコンテキスト"""
+    channel_message = SlackMessage(
+        message_id="msg-channel-001",
+        channel_id="C12345678",
+        user_id="U11111111",
+        user_name="bob",
+        text="チャンネルでの会話です",
+        timestamp=datetime.now(UTC),
+    )
+    return ConversationContext(
+        channel_id="C12345678",
+        thread_ts=None,
+        messages=[channel_message],
         last_updated=datetime.now(UTC),
     )
 
@@ -100,18 +120,59 @@ class TestGenerateResponse:
             assert isinstance(result, LLMResponse)
             assert result.content == "いい天気ですね！お出かけ日和ですよ。"
 
-    async def test_generate_with_context(
+    async def test_generate_with_thread_context(
         self,
         agent: ResponseGeneratorAgent,
         sample_message: SlackMessage,
-        sample_context: ConversationContext,
+        sample_thread_context: ConversationContext,
         valid_llm_response: LLMResponse,
     ) -> None:
-        """コンテキスト付きで生成できること"""
+        """スレッドコンテキスト付きで生成できること"""
         with patch.object(agent._agent, "call_llm", new_callable=AsyncMock) as mock_call_llm:
             mock_call_llm.return_value = valid_llm_response
 
-            result = await agent.generate_response(message=sample_message, context=sample_context)
+            result = await agent.generate_response(
+                message=sample_message, thread_context=sample_thread_context
+            )
+
+            assert isinstance(result, LLMResponse)
+            mock_call_llm.assert_called_once()
+
+    async def test_generate_with_channel_context(
+        self,
+        agent: ResponseGeneratorAgent,
+        sample_message: SlackMessage,
+        sample_channel_context: ConversationContext,
+        valid_llm_response: LLMResponse,
+    ) -> None:
+        """チャンネルコンテキスト付きで生成できること"""
+        with patch.object(agent._agent, "call_llm", new_callable=AsyncMock) as mock_call_llm:
+            mock_call_llm.return_value = valid_llm_response
+
+            result = await agent.generate_response(
+                message=sample_message, channel_context=sample_channel_context
+            )
+
+            assert isinstance(result, LLMResponse)
+            mock_call_llm.assert_called_once()
+
+    async def test_generate_with_both_contexts(
+        self,
+        agent: ResponseGeneratorAgent,
+        sample_message: SlackMessage,
+        sample_thread_context: ConversationContext,
+        sample_channel_context: ConversationContext,
+        valid_llm_response: LLMResponse,
+    ) -> None:
+        """両コンテキスト付きで生成できること"""
+        with patch.object(agent._agent, "call_llm", new_callable=AsyncMock) as mock_call_llm:
+            mock_call_llm.return_value = valid_llm_response
+
+            result = await agent.generate_response(
+                message=sample_message,
+                thread_context=sample_thread_context,
+                channel_context=sample_channel_context,
+            )
 
             assert isinstance(result, LLMResponse)
             mock_call_llm.assert_called_once()
